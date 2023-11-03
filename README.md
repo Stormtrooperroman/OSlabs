@@ -2,7 +2,7 @@
 
 ## Лабораторная работа 1
 
-Лабораторная работа 1 содержится в файле lab1.cpp
+Лабораторная работа 1 содержится в файле [lab1.cpp](https://github.com/Stormtrooperroman/OSlabs/blob/master/lab1.cpp)
 
 ### Задание
 
