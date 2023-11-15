@@ -30,7 +30,6 @@ void Provide(list<int> x) {
         << this_thread::get_id() << "\n";
         ready = false;
         condVar.notify_all();
-        uniqueLock1.unlock();
     }
 }
 void Consume() {
@@ -43,7 +42,6 @@ void Consume() {
         << this_thread::get_id() << "\n";
         ready = true;
         condVar.notify_all();
-        uniqueLock2.unlock();
     }
 }
 
