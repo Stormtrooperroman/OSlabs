@@ -5,15 +5,23 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <string>
 
+const int MAX_CLIENTS = 2;
+const int BUFFER_SIZE = 1024;
 
-using namespace std;
-
-
-struct client_t {
+class Client {
+public:
     int connfd;
     sockaddr_in addr;
 };
+
+
+void printClientAddress(const sockaddr_in& addr) {
+    char ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(addr.sin_addr), ip, INET_ADDRSTRLEN);
+    std::cout << "[" << ip << ":" << htons(addr.sin_port) << "]";
+}
 
 volatile sig_atomic_t wasSignal = 0;
 
@@ -40,7 +48,7 @@ int createServer(int port) {
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
-        cout << "Socket creation failed" << endl;
+        std::cerr << "Socket creation failed" << std::endl;
         exit(-1);
     }
     memset(&servaddr, 0, sizeof(servaddr));
@@ -50,24 +58,22 @@ int createServer(int port) {
     servaddr.sin_port = htons(port);
 
     if (bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) {
-        cout << "Socket bind failed" << endl;
+        std::cerr << "Socket bind failed" << std::endl;
         exit(-1);
     }
 
-    if (listen(sockfd, 5) != 0) {
-        cout << "Listen failed" << endl;
+    if (listen(sockfd, MAX_CLIENTS) != 0) {
+        std::cerr << "Listen failed" << std::endl;
         exit(-1);
     }
 
     return sockfd;
 }
 
-int main() {
-    int sockfd = createServer(5005);
-    cout << "Listening..." << endl;
-    client_t clients[2];
+void runServer(int sockfd) {
+    Client clients[MAX_CLIENTS] = {};
     int active_clients = 0;
-    char buffer[1024] = {0};
+    std::string buffer;
 
     sigset_t origSigMask;
     setupSignalHandler(&origSigMask);
@@ -75,13 +81,12 @@ int main() {
     while (true) {
         if (wasSignal) {
             wasSignal = 0;
-            cout << "Clients: ";
+            std::cout << "Clients: ";
             for (int i = 0; i < active_clients; i++) {
-                printf("[%s:%d]", inet_ntoa(clients[i].addr.sin_addr),
-                       htons(clients[i].addr.sin_port));
-                cout << " ";
+                printClientAddress(clients[i].addr);
+                std::cout << " ";
             }
-            cout << endl;
+            std::cout << std::endl;
         }
 
         fd_set fds;
@@ -98,36 +103,37 @@ int main() {
 
         if (pselect(maxFd + 1, &fds, nullptr, nullptr, nullptr, &origSigMask) < 0
             && errno != EINTR) {
-            cout << "pselect failed" << endl;
-            return -1;
+            std::cerr << "pselect failed" << std::endl;
+            return;
         }
 
-        if (FD_ISSET(sockfd, &fds) && active_clients < 3) {
-            client_t* client = &clients[active_clients];
+        if (FD_ISSET(sockfd, &fds) && active_clients < MAX_CLIENTS) {
+            Client* client = &clients[active_clients];
             socklen_t len = sizeof(client->addr);
             int connfd = accept(sockfd, (struct sockaddr*)&client->addr, &len);
             if (connfd >= 0) {
                 client->connfd = connfd;
-                printf("[%s:%d]", inet_ntoa(client->addr.sin_addr), htons(client->addr.sin_port));
-                cout << " Connected!" << endl;
+                printClientAddress(clients->addr);
+                std::cout << " Connected!" << std::endl;
                 active_clients++;
             } else {
-                printf("Accept error: %s\n", strerror(errno));
+                std::cout << "Accept error: " << strerror(errno) << std::endl;
             }
         }
 
         for (int i = 0; i < active_clients; i++) {
-            client_t* client = &clients[i];
+            Client* client = &clients[i];
             if (FD_ISSET(client->connfd, &fds)) {
-                int read_len = read(client->connfd, &buffer, 1023);
+                buffer.clear();
+                int read_len = read(client->connfd, &buffer[0], BUFFER_SIZE - 1);
                 if (read_len > 0) {
                     buffer[read_len - 1] = 0;
-                    printf("[%s:%d]", inet_ntoa(client->addr.sin_addr), htons(client->addr.sin_port));
-                    printf(" %s\n", buffer);
+                    printClientAddress(clients->addr);
+                    std::cout << " Message: " << buffer.c_str() << std::endl;
                 } else {
                     close(client->connfd);
-                    printf("[%s:%d]", inet_ntoa(client->addr.sin_addr), htons(client->addr.sin_port));
-                    cout << " Connection closed" << endl;
+                    printClientAddress(clients->addr);
+                    std::cout << " Connection closed" << std::endl;
                     clients[i] = clients[active_clients - 1];
                     active_clients--;
                     i--;
@@ -135,6 +141,12 @@ int main() {
             }
         }
     }
+}
 
+
+int main() {
+    int sockfd = createServer(5005);
+    std::cout << "Listening..." << std::endl;
+    runServer(sockfd);
     return 0;
 }
