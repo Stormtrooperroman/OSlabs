@@ -101,6 +101,14 @@ void runServer(int sockfd) {
             }
         }
 
+        if (pselect(maxFd + 1, &fds, nullptr, nullptr, nullptr, &origSigMask) < 0) {
+            if (errno == EINTR) {
+                continue;
+            } 
+            std::cerr << "pselect failed" << std::endl;
+            return;
+        }
+
         if (pselect(maxFd + 1, &fds, nullptr, nullptr, nullptr, &origSigMask) < 0
             && errno != EINTR) {
             std::cerr << "pselect failed" << std::endl;
