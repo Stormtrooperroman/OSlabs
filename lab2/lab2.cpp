@@ -25,7 +25,7 @@ void printClientAddress(const sockaddr_in& addr) {
 
 volatile sig_atomic_t wasSignal = 0;
 
-void signalHandler(int /*signum*/) {
+void signalHandler(int signum) {
     wasSignal = 1;
 }
 
