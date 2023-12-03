@@ -109,12 +109,6 @@ void runServer(int sockfd) {
             return;
         }
 
-        if (pselect(maxFd + 1, &fds, nullptr, nullptr, nullptr, &origSigMask) < 0
-            && errno != EINTR) {
-            std::cerr << "pselect failed" << std::endl;
-            return;
-        }
-
         if (FD_ISSET(sockfd, &fds) && active_clients < MAX_CLIENTS) {
             Client* client = &clients[active_clients];
             socklen_t len = sizeof(client->addr);
