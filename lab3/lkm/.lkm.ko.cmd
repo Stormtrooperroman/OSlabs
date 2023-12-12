@@ -1,0 +1,1 @@
+savedcmd_/home/romanl/Desktop/OSlabs/lab3/lkm/lkm.ko := ld -r -m elf_x86_64 -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /home/romanl/Desktop/OSlabs/lab3/lkm/lkm.ko /home/romanl/Desktop/OSlabs/lab3/lkm/lkm.o /home/romanl/Desktop/OSlabs/lab3/lkm/lkm.mod.o;  true

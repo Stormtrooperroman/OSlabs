@@ -1,0 +1,1 @@
+savedcmd_/home/romanl/Desktop/OSlabs/lab3/lkm/Module.symvers :=  scripts/mod/modpost -M  -a    -N  -o /home/romanl/Desktop/OSlabs/lab3/lkm/Module.symvers -T /home/romanl/Desktop/OSlabs/lab3/lkm/modules.order -i Module.symvers -e 
