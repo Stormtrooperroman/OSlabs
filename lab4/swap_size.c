@@ -36,7 +36,7 @@ ssize_t my_proc_read(struct file *filp,char *buf,size_t count,loff_t *offp )
     }
     temp = temp - count;
 
-    err = copy_to_user(buf,data, count);
+    err = copy_to_user(buf,data, len);
 
 
     printk(KERN_INFO "Read data : %s", buf);
