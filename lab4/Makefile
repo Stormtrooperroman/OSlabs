@@ -10,6 +10,6 @@ clean:
 test:
 	sudo dmesg -C
 	sudo insmod swap_size.ko
-	cat /proc/tsulabs
+	cat /proc/tsulab
 	sudo rmmod swap_size.ko
 	sudo dmesg
