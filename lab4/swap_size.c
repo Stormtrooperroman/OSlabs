@@ -86,15 +86,14 @@ int create_new_proc_entry(void) {
         return -1;
     }
 
-    strncpy(msg, DATA, len+1);
-    for (i=0; i < len +1 ; i++) {
+    strncpy(msg, DATA, len);
+    for (i=0; i < len; i++) {
         printk(KERN_INFO "%c", msg[i]);
         if (msg[i] == '\0') {
             printk(KERN_INFO "YES");
         }
     }
 
-    // proc=proc_create_data(MY_PROC_ENTRY,0,NULL,&proc_fops,msg);
     proc = proc_create_data(MY_PROC_ENTRY, 0666, NULL, &proc_fops, msg);
     if (proc) {
         return 0;
