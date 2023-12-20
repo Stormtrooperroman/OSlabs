@@ -89,9 +89,6 @@ int create_new_proc_entry(void) {
     strncpy(msg, DATA, len);
     for (i=0; i < len; i++) {
         printk(KERN_INFO "%c", msg[i]);
-        if (msg[i] == '\0') {
-            printk(KERN_INFO "YES");
-        }
     }
 
     proc = proc_create_data(MY_PROC_ENTRY, 0666, NULL, &proc_fops, msg);
